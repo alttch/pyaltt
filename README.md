@@ -50,7 +50,7 @@ from pyaltt import background_worker
 #transforms function into background worker which run in a loop
 @background_worker
 def myworker(**kwargs):
-    print('I'm a worker ' + kwargs.get('worker_name'))
+    print('I\'m a worker ' + kwargs.get('worker_name'))
 
 myworker.start()
 # ................
