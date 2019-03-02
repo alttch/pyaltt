@@ -148,8 +148,8 @@ from pyaltt import background_worker
 
 #transforms function into background worker which run on task in queue
 @background_worker(e=True)
-def myworker(task, **kwargs):
-    print('Got a task %s' % task)
+def myworker(**kwargs):
+    print('event triggered')
 
 myworker.start()
 # ................
