@@ -77,6 +77,14 @@ Parameters for @background_worker:
 Note: if running in virtual machine, unset "sync guest time with host"
 otherwise real time sleep may work unpredictable.
 
+Poll delay should be lower or equal to delays. If you set very short delays,
+don't forget to decrease poll delay as well.
+
+Real time loop execution in this library is not 100% exact and can't be used
+e.g. in heavy industry. Real time loops require dedicated coding for the
+particular task and for small delays can't be coded with Python at all or
+require special tricks/hardware.
+
 Parameters for start():
 
 * **_daemon** override initial params and set worker as daemon or not
@@ -120,11 +128,17 @@ Task can be any object (obvious). Worker has task always as first parameter.
 
 Parameters for start() / stop() are the same as for looped worker.
 
+Stopping loop from worker
+-------------------------
+
+This can be done in 2 ways: calling *myworker.terminate()* from worker function
+or simply return *False*.
+
 Working directly with classes
 -----------------------------
 
-Classes **pyaltt.workers.BackgroundWorker** and
-**pyaltt.workers.BackgroundQueueWorker** can be used without a wrapper.
+Classes **BackgroundWorker** and **BackgroundQueueWorker** can be used without
+a wrapper.
 
 You can override **loop** method to have own function executed when worker
 starts.

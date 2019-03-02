@@ -14,7 +14,7 @@ class BackgroundWorker:
 
     def __init__(self, name=None, func=None, **kwargs):
         self.__thread = None
-        self.__active = False
+        self._active = False
         self.daemon = kwargs.get('daemon', True)
         self.o = kwargs.get('o')
         self.on_error = kwargs.get('on_error')
@@ -40,28 +40,31 @@ class BackgroundWorker:
         if '_interval' in kwargs:
             self.keep_interval = True
         self.realtime = kwargs.get('_realtime', self.realtime)
-        if not (self.__active and self.__thread and self.__thread.isAlive()):
+        if not (self._active and self.__thread and self.__thread.isAlive()):
             self.__thread = threading.Thread(
                 target=self._start_worker,
                 name=self.name,
                 args=args,
                 kwargs=kwargs)
             self.__thread.setDaemon(kwargs.get('_daemon', self.daemon))
-            self.__active = True
+            self._active = True
             self.before_start()
             self.__thread.start()
             self.after_start()
 
     def stop(self, wait=True):
-        if self.__active and self.__thread and self.__thread.isAlive():
+        if self._active and self.__thread and self.__thread.isAlive():
             self.before_stop()
-            self.__active = False
+            self._active = False
             self.after_stop()
             if wait:
                 self.__thread.join()
 
+    def terminate(self):
+        self._active = False
+
     def is_active(self):
-        return self.__active
+        return self._active
 
     def error(self, e):
         if self.on_error:
@@ -78,7 +81,7 @@ class BackgroundWorker:
             lc = int(t / self.poll_delay)
         while True:
             time.sleep(self.poll_delay)
-            if not self.is_active():
+            if not self._active:
                 return False
             if self.realtime:
                 if time.time() > tstart + t:
@@ -99,12 +102,16 @@ class BackgroundWorker:
             kw['worker_name'] = self.name
         if not 'o' in kw:
             kw['o'] = self.o
-        while self.is_active():
+        while self._active:
             try:
                 if self.keep_interval: tstart = time.time()
                 if self.delay_before:
                     if not self.sleep(self.delay_before): break
-                self.run(*args, **kw)
+                if not self._active: break
+                if self.run(*args, **kw) == False:
+                    self._active = False
+                    break
+                if not self._active: break
                 if self.delay:
                     if self.keep_interval:
                         t = self.delay + tstart - time.time()
@@ -117,7 +124,7 @@ class BackgroundWorker:
     # ----- override below this -----
 
     def run(self, *args, **kwargs):
-        self.__active = False
+        self._active = False
         raise Exception('not implemented')
 
     def before_start(self):
@@ -148,13 +155,15 @@ class BackgroundQueueWorker(BackgroundWorker):
             kw['worker_name'] = self.name
         if not 'o' in kw:
             kw['o'] = self.o
-        while self.is_active():
+        while self._active:
             try:
                 task = self._Q.get()
-                if not self.is_active(): break
+                if not self._active: break
                 if task is not None:
                     try:
-                        self.run(task, *args, **kw)
+                        if self.run(task, *args, **kw) == False:
+                            self._active = False
+                            break
                     except Exception as e:
                         self.error(e)
             except Exception as e:
