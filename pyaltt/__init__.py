@@ -14,20 +14,3 @@ from pyaltt.workers import BackgroundEventWorker
 from pyaltt.functools import FunctionCollecton
 
 g = threading.local()
-
-
-def g_getattr(attr, default=None):
-    return getattr(g, attr, default)
-
-
-def g_setattr(attr, value):
-    return setattr(g, attr, value)
-
-
-def g_hasattr(attr):
-    return hasattr(g, attr)
-
-
-g.get = g_getattr
-g.set = g_setattr
-g.has = g_hasattr
