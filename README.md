@@ -27,7 +27,7 @@ funcs.run()
 ```
 
 Real life example: define **shutdown** function collection and call
-*shutdown.run()* to stop all background threads.
+*shutdown.run()* or simply *shutdown()* to stop all background threads.
 
 Parameters:
 
@@ -62,8 +62,8 @@ print(funcs.run())
 # { '__main__.f1': 1, '__main__.f2': 2 }
 ```
 
-Real life example: define **dump** function collection and call *dump.run()* to
-collect crash dump information from all registered modules.
+Real life example: define **dump** function collection and call *dump.run()* or
+simply *dump()* to collect crash dump information from all registered modules.
 
 Parameters:
 
