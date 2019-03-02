@@ -6,7 +6,7 @@ License: Apache License 2.0
 FunctionCollection
 ==================
 
-Collect and run a pack of functions
+Collects and executes a pack of functions
 
 Usage example:
  
@@ -28,6 +28,42 @@ funcs.run()
 
 Real life example: define **shutdown** function collection and call
 *shutdown.run()* to stop all background threads.
+
+Parameters:
+
+* **on_error** function which is called if any function throws an exeption
+  (with e=Exception argument), or if **remove** method is called and function
+  doesn't exist in collection.
+* **on_error_kwargs** additional arguments for *on_error*
+
+NamedFunctionCollection
+=======================
+
+Collects and executes a pack of functions, returns result
+
+Usage example:
+ 
+```python
+from pyaltt import NamedFunctionCollecton
+
+funcs = NamedFunctionCollecton()
+
+@funcs
+def f1():
+    print('I am function 1')
+    return 1
+
+@funcs
+def f2():
+    print('I am function 2')
+    return 2
+
+print(funcs.run())
+# { '__main__.f1': 1, '__main__.f2': 2 }
+```
+
+Real life example: define **dump** function collection and call *dump.run()* to
+collect crash dump information from all registered modules.
 
 Parameters:
 
