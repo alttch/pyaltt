@@ -146,7 +146,7 @@ Background worker which runs method on event.
 ```python
 from pyaltt import background_worker
 
-#transforms function into background worker which run on task in queue
+#transforms function into background worker which runs on event
 @background_worker(e=True)
 def myworker(**kwargs):
     print('event triggered')
