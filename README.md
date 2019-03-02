@@ -91,8 +91,8 @@ require special tricks/hardware.
 Parameters for start():
 
 * **_daemon** override initial params and set worker as daemon or not
-* delay, interval and realtime parameters can be overriden in start (use kwargs
-  with *_*: _delay, _interval etc.)
+* name, delay, interval and realtime parameters can be overriden in start (use
+  kwargs with *_*: _name, _delay, _interval etc.)
 
 * All other parameters are passed to worker function (both args and kwargs)
 

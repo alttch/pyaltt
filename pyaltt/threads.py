@@ -1,7 +1,7 @@
 __author__ = "Altertech Group, http://www.altertech.com/"
 __copyright__ = "Copyright (C) 2018-2019 Altertech Group"
 __license__ = "Apache License 2.0"
-__version__ = "0.1.3"
+__version__ = "0.1.5"
 
 import threading
 
@@ -23,10 +23,15 @@ class LocalProxy(threading.local):
 def background_job(f, *args, **kwargs):
 
     @wraps(f)
-    def start_thread(_t_group=None, _t_name=None, _daemon=False, **kwargs):
+    def start_thread(*args, **kw):
+        print(kwargs)
         t = threading.Thread(
-            group=_t_group, target=f, name=_t_name, kwargs=kwargs)
-        if _daemon: t.setDaemon(True)
+            group=kwargs.get('group'),
+            target=f,
+            name=kwargs.get('name'),
+            args=args,
+            kwargs=kw)
+        if kwargs.get('daemon'): t.setDaemon(True)
         t.start()
         return t
 

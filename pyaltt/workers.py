@@ -1,7 +1,7 @@
 __author__ = "Altertech Group, http://www.altertech.com/"
 __copyright__ = "Copyright (C) 2018-2019 Altertech Group"
 __license__ = "Apache License 2.0"
-__version__ = "0.1.3"
+__version__ = "0.1.5"
 
 import threading
 import queue
@@ -29,6 +29,9 @@ class BackgroundWorker:
             self.keep_interval = False
         self.realtime = kwargs.get('realtime', False)
         if func: self.run = func
+        self.set_name(name)
+
+    def set_name(self, name):
         self.name = '_background_worker_%s' % (name if name is not None else
                                                uuid.uuid4())
 
@@ -39,6 +42,8 @@ class BackgroundWorker:
             kwargs.get('_delay', kwargs.get('_delay_after', self.delay)))
         if '_interval' in kwargs:
             self.keep_interval = True
+        if '_name' in kwargs:
+            self.set_name(kwargs['_name'])
         self.realtime = kwargs.get('_realtime', self.realtime)
         if not (self._active and self.__thread and self.__thread.isAlive()):
             self.__thread = threading.Thread(
