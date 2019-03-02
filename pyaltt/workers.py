@@ -110,7 +110,7 @@ class BackgroundWorker:
                         t = self.delay + tstart - time.time()
                         if t > 0: self.sleep(t)
                     else:
-                        if not time.sleep(self.delay): break
+                        if not self.sleep(self.delay): break
             except Exception as e:
                 self.error(e)
 
