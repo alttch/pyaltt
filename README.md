@@ -42,6 +42,9 @@ Background workers
 Looped worker decorator
 -----------------------
 
+Simple background worker which executes method in loop, with an interval/delay
+if set.
+
 Usage example:
 
 ```python
@@ -101,6 +104,11 @@ continue (default is wait until worker finish)
 
 Queue worker decorator
 ----------------------
+
+Background worker which processes tasks in a queue.
+
+Usage example:
+
 ```python
 from pyaltt import background_worker
 
@@ -121,12 +129,44 @@ Parameters:
 * **name**, **daemon**, **o**, **on_error**, **on_error_kwargs** same as for
   looped worker
 * **queue_class** use alternative queue class (e.g. queue.PriorityQueue,
-  default is *queue,Queue*). If this parameter is set, *q=True* is not
-  required.
+  default is *queue,Queue*).
+* **queue** use external queue
+
+If *queue* or *queue_class* parameters are set, *q=True* is not required.
 
 Task can be any object (obvious). Worker has task always as first parameter.
 
 Parameters for start() / stop() are the same as for looped worker.
+
+Event worker decorator
+----------------------
+
+Background worker which runs method on event.
+
+```python
+from pyaltt import background_worker
+
+#transforms function into background worker which run on task in queue
+@background_worker(e=True)
+def myworker(task, **kwargs):
+    print('Got a task %s' % task)
+
+myworker.start()
+# ................
+myworker.trigger()
+# ................
+myworker.stop()
+```
+
+Parameters:
+
+* **name**, **daemon**, **o**, **on_error**, **on_error_kwargs** same as for
+  looped worker
+* **event** use external *threading.Event()* object. If this parameter is set,
+  *e=True* is not required.
+
+Parameters for start() / stop() are the same as for looped worker.
+
 
 Stopping loop from worker
 -------------------------
@@ -137,8 +177,7 @@ or simply return *False*.
 Working directly with classes
 -----------------------------
 
-Classes **BackgroundWorker** and **BackgroundQueueWorker** can be used without
-a wrapper.
+Background worker classes can be used without a wrapper.
 
 You can override **loop** method to have own function executed when worker
 starts.

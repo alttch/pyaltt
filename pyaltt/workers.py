@@ -1,7 +1,7 @@
 __author__ = "Altertech Group, http://www.altertech.com/"
 __copyright__ = "Copyright (C) 2018-2019 Altertech Group"
 __license__ = "Apache License 2.0"
-__version__ = "0.0.7"
+__version__ = "0.0.8"
 
 import threading
 import queue
@@ -143,7 +143,7 @@ class BackgroundWorker:
 class BackgroundQueueWorker(BackgroundWorker):
 
     def __init__(self, name=None, **kwargs):
-        self._Q = kwargs.get('queue_class', queue.Queue)()
+        self._Q = kwargs.get('queue', kwargs.get('queue_class', queue.Queue)())
         super().__init__(name=name, **kwargs)
 
     def put(self, task):
@@ -173,13 +173,48 @@ class BackgroundQueueWorker(BackgroundWorker):
         self._Q.put(None)
 
 
+class BackgroundEventWorker(BackgroundWorker):
+
+    def __init__(self, name=None, **kwargs):
+        self.event = kwargs.get('event', threading.Event())
+        super().__init__(name=name, **kwargs)
+
+    def trigger(self):
+        self.event.set()
+
+    def loop(self, *args, **kwargs):
+        kw = kwargs.copy()
+        if not 'worker_name' in kw:
+            kw['worker_name'] = self.name
+        if not 'o' in kw:
+            kw['o'] = self.o
+        while self._active:
+            try:
+                self.event.wait()
+                self.event.clear()
+                if not self._active: break
+                try:
+                    if self.run(*args, **kw) == False:
+                        self._active = False
+                        break
+                except Exception as e:
+                    self.error(e)
+            except Exception as e:
+                self.error(e)
+
+    def after_stop(self):
+        self.event.set()
+
+
 def background_worker(*args, **kwargs):
 
     def decorator(f):
         func = f
         kw = kwargs.copy()
-        if kwargs.get('q') or 'queue_class' in kwargs:
+        if kwargs.get('q') or 'queue_class' in kwargs or 'queue' in kwargs:
             C = BackgroundQueueWorker
+        elif kwargs.get('e') or 'event' in kwargs:
+            C = BackgroundEventWorker
         else:
             C = BackgroundWorker
         if 'name' in kw:
