@@ -51,6 +51,8 @@ def my_run():
     result = fc.execute()
     print('Shutdown finished')
     return result
+
+fc.run = my_run
 ```
 
 Background workers
