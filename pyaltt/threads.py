@@ -1,7 +1,7 @@
 __author__ = "Altertech Group, http://www.altertech.com/"
 __copyright__ = "Copyright (C) 2018-2019 Altertech Group"
 __license__ = "Apache License 2.0"
-__version__ = "0.1.8"
+__version__ = "0.1.9"
 
 import threading
 
@@ -24,7 +24,6 @@ def background_job(f, *args, **kwargs):
 
     @wraps(f)
     def start_thread(*args, **kw):
-        print(kwargs)
         t = threading.Thread(
             group=kwargs.get('group'),
             target=f,

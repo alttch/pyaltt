@@ -13,57 +13,26 @@ Usage example:
 ```python
 from pyaltt import FunctionCollecton
 
-funcs = FunctionCollecton()
+fc = FunctionCollecton()
 
-@funcs
-def f1():
-    print('I am function 1')
-
-@funcs
-def f2():
-    print('I am function 2')
-
-funcs.run()
-```
-
-Real life example: define **shutdown** function collection and call
-*shutdown.run()* or simply *shutdown()* to stop all background threads.
-
-Parameters:
-
-* **on_error** function which is called if any function throws an exeption
-  (with e=Exception argument), or if **remove** method is called and function
-  doesn't exist in collection.
-* **on_error_kwargs** additional arguments for *on_error*
-
-NamedFunctionCollection
-=======================
-
-Collects and executes a pack of functions, returns result
-
-Usage example:
- 
-```python
-from pyaltt import NamedFunctionCollecton
-
-funcs = NamedFunctionCollecton()
-
-@funcs
+@fc
 def f1():
     print('I am function 1')
     return 1
 
-@funcs
+@fc
 def f2():
     print('I am function 2')
     return 2
 
-print(funcs.run())
-# { '__main__.f1': 1, '__main__.f2': 2 }
+result = fc.run() # or fc(), returns dict containing all function results
 ```
 
 Real life example: define **dump** function collection and call *dump.run()* or
-simply *dump()* to collect crash dump information from all registered modules.
+simply *dump()* to collect registered modules information.
+
+Real life example 2: define **shutdown** function collection and call
+*shutdown()* to stop threads of background workers.
 
 Parameters:
 
@@ -71,6 +40,18 @@ Parameters:
   (with e=Exception argument), or if **remove** method is called and function
   doesn't exist in collection.
 * **on_error_kwargs** additional arguments for *on_error*
+
+*run()* method actually just calls *return self.execute()*, so you can easily
+override it:
+
+```python
+
+def my_run():
+    print('Shutdown started')
+    result = fc.execute()
+    print('Shutdown finished')
+    return result
+```
 
 Background workers
 ==================

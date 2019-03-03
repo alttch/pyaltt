@@ -1,7 +1,7 @@
 __author__ = "Altertech Group, http://www.altertech.com/"
 __copyright__ = "Copyright (C) 2018-2019 Altertech Group"
 __license__ = "Apache License 2.0"
-__version__ = "0.1.8"
+__version__ = "0.1.9"
 
 
 class FunctionCollecton:
@@ -27,11 +27,18 @@ class FunctionCollecton:
             self.error(e)
 
     def run(self):
+        return self.execute()
+
+    def execute(self):
+        result = {}
         for f in self._functions:
+            k = '{}.{}'.format(f.__module__, f.__name__)
             try:
-                f()
+                result[k] = f()
             except Exception as e:
+                result[k] = str(e)
                 self.error(e)
+        return result
 
     def error(self, e):
         if self.on_error:
@@ -40,35 +47,3 @@ class FunctionCollecton:
             self.on_error(**kwargs)
         else:
             raise
-
-
-class NamedFunctionCollecton(FunctionCollecton):
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self._functions = {}
-
-    def __call__(self, f=None):
-        if f:
-            self.append(f, '{}.{}'.format(f.__module__, f.__name__))
-        else:
-            return self.run()
-
-    def append(self, f, name):
-        self._functions[name] = f
-
-    def remove(self, name):
-        try:
-            del self._functions[name]
-        except Exception as e:
-            self.error(e)
-
-    def run(self):
-        result = {}
-        for name, f in self._functions.items():
-            try:
-                result[name] = f()
-            except Exception as e:
-                result[name] = str(e)
-                self.error(e)
-        return result
