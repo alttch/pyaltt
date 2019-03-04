@@ -42,14 +42,18 @@ Parameters:
 * **on_error_kwargs** additional arguments for *on_error*
 
 *run()* method actually just calls *return self.execute()*, so you can easily
-override it:
+override it. In addition to function result dict, *execute()* returns *True* if
+all functions were executed without an exceptions, *False* if not.
 
 ```python
 
 def my_run():
     print('Shutdown started')
-    result = fc.execute()
-    print('Shutdown finished')
+    result, success = fc.execute()
+    if success:
+        print('Shutdown finished')
+    else:
+        print('Shutdown failed')
     return result
 
 fc.run = my_run
@@ -196,7 +200,14 @@ or simply return *False*.
 Working directly with classes
 -----------------------------
 
-Background worker classes can be used without a wrapper.
+If you define background workers in your classes which may be inherited or have
+multiple objects, Background worker classes should be used without a wrapper.
+
+Class names:
+
+* **pyaltt.BackgroundWorker**
+* **pyaltt.BackgroundQueueWorker**
+* **pyaltt.BackgroundEventWorker**
 
 You can override **loop** method to have own function executed when worker
 starts.

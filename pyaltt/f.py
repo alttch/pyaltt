@@ -1,7 +1,7 @@
 __author__ = "Altertech Group, http://www.altertech.com/"
 __copyright__ = "Copyright (C) 2018-2019 Altertech Group"
 __license__ = "Apache License 2.0"
-__version__ = "0.1.9"
+__version__ = "0.1.10"
 
 
 class FunctionCollecton:
@@ -27,10 +27,11 @@ class FunctionCollecton:
             self.error(e)
 
     def run(self):
-        return self.execute()
+        return self.execute()[0]
 
     def execute(self):
         result = {}
+        all_ok = True
         for f in self._functions:
             k = '{}.{}'.format(f.__module__, f.__name__)
             try:
@@ -38,7 +39,8 @@ class FunctionCollecton:
             except Exception as e:
                 result[k] = str(e)
                 self.error(e)
-        return result
+                all_ok = False
+        return result, all_ok
 
     def error(self, e):
         if self.on_error:
