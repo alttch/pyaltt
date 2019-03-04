@@ -1,7 +1,7 @@
 __author__ = "Altertech Group, http://www.altertech.com/"
 __copyright__ = "Copyright (C) 2018-2019 Altertech Group"
 __license__ = "Apache License 2.0"
-__version__ = "0.1.11"
+__version__ = "0.1.12"
 
 import traceback
 
@@ -18,6 +18,7 @@ class FunctionCollecton:
     def __call__(self, f=None):
         if f:
             self.append(f)
+            return f
         else:
             return self.run()
 
