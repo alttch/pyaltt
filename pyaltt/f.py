@@ -1,7 +1,9 @@
 __author__ = "Altertech Group, http://www.altertech.com/"
 __copyright__ = "Copyright (C) 2018-2019 Altertech Group"
 __license__ = "Apache License 2.0"
-__version__ = "0.1.10"
+__version__ = "0.1.11"
+
+import traceback
 
 
 class FunctionCollecton:
@@ -10,6 +12,8 @@ class FunctionCollecton:
         self._functions = set()
         self.on_error = kwargs.get('on_error')
         self.on_error_kwargs = kwargs.get('on_error_kwargs', {})
+        self.include_exceptions = True if kwargs.get(
+            'include_exceptions') else False
 
     def __call__(self, f=None):
         if f:
@@ -37,7 +41,10 @@ class FunctionCollecton:
             try:
                 result[k] = f()
             except Exception as e:
-                result[k] = str(e)
+                if self.include_exceptions:
+                    result[k] = (e, traceback.format_exc())
+                else:
+                    result[k] = None
                 self.error(e)
                 all_ok = False
         return result, all_ok

@@ -40,6 +40,9 @@ Parameters:
   (with e=Exception argument), or if **remove** method is called and function
   doesn't exist in collection.
 * **on_error_kwargs** additional arguments for *on_error*
+* **include_exceptions** if function fails, value in result dict is set to
+  *None* by default.  Specifying *include_exceptions=True* will set value to
+  tuple (Exception, traceback)
 
 *run()* method actually just calls *return self.execute()*, so you can easily
 override it. In addition to function result dict, *execute()* returns *True* if
