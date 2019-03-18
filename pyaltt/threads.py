@@ -1,7 +1,7 @@
 __author__ = "Altertech Group, http://www.altertech.com/"
 __copyright__ = "Copyright (C) 2018-2019 Altertech Group"
 __license__ = "Apache License 2.0"
-__version__ = "0.1.12"
+__version__ = "0.2.0"
 
 import threading
 
@@ -18,6 +18,9 @@ class LocalProxy(threading.local):
 
     def set(self, attr, value):
         return setattr(self, attr, value)
+
+    def clear(self, attr):
+        return delattr(self, attr) if hasattr(self, attr) else True
 
 
 def background_job(f, *args, **kwargs):
