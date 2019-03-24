@@ -1,7 +1,7 @@
 __author__ = "Altertech Group, http://www.altertech.com/"
 __copyright__ = "Copyright (C) 2018-2019 Altertech Group"
 __license__ = "Apache License 2.0"
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 import threading
 import queue
@@ -213,9 +213,9 @@ class BackgroundEventWorker(BackgroundWorker):
 
 def background_worker(*args, **kwargs):
 
-    def decorator(f):
+    def decorator(f, **kw):
         func = f
-        kw = kwargs.copy()
+        kw = kw.copy() if kw else kwargs
         if kwargs.get('q') or 'queue_class' in kwargs or 'queue' in kwargs:
             C = BackgroundQueueWorker
         elif kwargs.get('e') or 'event' in kwargs:
