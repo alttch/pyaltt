@@ -1,7 +1,7 @@
 __author__ = "Altertech Group, http://www.altertech.com/"
 __copyright__ = "Copyright (C) 2018-2019 Altertech Group"
 __license__ = "Apache License 2.0"
-__version__ = "0.2.1"
+__version__ = "0.2.4"
 
 import threading
 import queue
@@ -45,6 +45,7 @@ class BackgroundWorker:
         if '_name' in kwargs:
             self.set_name(kwargs['_name'])
         self.realtime = kwargs.get('_realtime', self.realtime)
+        kwargs['_worker'] = self
         if not (self._active and self.__thread and self.__thread.isAlive()):
             self.__thread = threading.Thread(
                 target=self._start_worker,

@@ -125,6 +125,8 @@ Parameters for start():
 Worker gets all parameters used in *start()* plus additionally, **worker_name**
 and **o** in kwargs (can be overriden in *start()*).
 
+Worker can access *self* object via *kwargs['_worker']*.
+
 Paramter *wait=False* can be used for *stop()* to send a signal to worker and
 continue (default is wait until worker finish)
 
