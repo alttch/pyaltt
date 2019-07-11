@@ -9,10 +9,7 @@ from functools import wraps
 
 from pyaltt import task_supervisor
 
-from pyaltt import TASK_LOW
 from pyaltt import TASK_NORMAL
-from pyaltt import TASK_HIGH
-from pyaltt import TASK_CRITICAL
 
 
 class LocalProxy(threading.local):
@@ -43,7 +40,7 @@ def background_job(f, *args, **kwargs):
         if kwargs.get('daemon'): t.setDaemon(True)
         starter = threading.Thread(
             target=_background_job_starter,
-            args=(t, kwargs.get('priority', TASK_LOW)))
+            args=(t, kwargs.get('priority', TASK_NORMAL)))
         starter.setDaemon(True)
         starter.start()
         if kwargs.get('wait_start'):

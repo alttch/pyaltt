@@ -11,12 +11,9 @@ import time
 
 from pyaltt import task_supervisor
 
-from pyaltt import TASK_LOW
 from pyaltt import TASK_NORMAL
-from pyaltt import TASK_HIGH
-from pyaltt import TASK_CRITICAL
 
-logger = logging.getLogger('pyaltt::workers')
+logger = logging.getLogger('pyaltt/workers')
 
 class BackgroundWorker:
 
@@ -24,7 +21,7 @@ class BackgroundWorker:
         self.__thread = None
         self._active = False
         self.daemon = kwargs.get('daemon', True)
-        self.priority = kwargs.get('priority', TASK_LOW)
+        self.priority = kwargs.get('priority', TASK_NORMAL)
         self.o = kwargs.get('o')
         self.on_error = kwargs.get('on_error')
         self.on_error_kwargs = kwargs.get('on_error_kwargs', {})

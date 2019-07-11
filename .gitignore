@@ -2,5 +2,4 @@ __pycache__
 pyaltt.egg-info
 build
 dist
-test.py
 Makefile

@@ -12,7 +12,7 @@ TASK_NORMAL = 10
 TASK_HIGH = 30
 TASK_CRITICAL = 50
 
-logger = logging.getLogger('pyaltt::supervisor')
+logger = logging.getLogger('pyaltt/supervisor')
 
 
 class WorkerSupervisor:
@@ -34,13 +34,23 @@ class WorkerSupervisor:
             reserve_normal=reserve_normal,
             reserve_high=reserve_high)
 
+    def higher_queues_busy(self, task_priority):
+        if task_priority == TASK_NORMAL:
+            return len(self.queue[TASK_HIGH]) > 0
+        elif task_priority == TASK_LOW:
+            return len(self.queue[TASK_NORMAL]) > 0 or \
+                    len(self.queue[TASK_HIGH]) > 0
+        else:
+            return False
+
     def acquire(self, task, task_priority):
         if self.active and task_priority != TASK_CRITICAL:
             self.lock.acquire()
             self.queue[task_priority].append(task)
             while self.active and \
                     (len(self.active_tasks) >= self.max_tasks[task_priority] \
-                        or self.queue[task_priority][0] != task):
+                        or self.queue[task_priority][0] != task or \
+                        self.higher_queues_busy(task_priority)):
                 self.lock.release()
                 time.sleep(self.poll_delay)
                 self.lock.acquire()
