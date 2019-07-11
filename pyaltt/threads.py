@@ -1,7 +1,7 @@
 __author__ = "Altertech Group, http://www.altertech.com/"
 __copyright__ = "Copyright (C) 2018-2019 Altertech Group"
 __license__ = "Apache License 2.0"
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 import threading
 
@@ -41,14 +41,24 @@ def background_job(f, *args, **kwargs):
             args=args,
             kwargs=kw)
         if kwargs.get('daemon'): t.setDaemon(True)
-        if task_supervisor.acquire(t, kwargs.get('priority', TASK_LOW)):
-            t.start()
-            releaser = threading.Thread(
-                target=_background_job_releaser, args=(t,))
-            releaser.start()
+        starter = threading.Thread(
+            target=_background_job_starter,
+            args=(t, kwargs.get('priority', TASK_LOW)))
+        starter.setDaemon(True)
+        starter.start()
+        if kwargs.get('wait'):
+            starter.join()
         return t
 
     return start_thread
+
+
+def _background_job_starter(t, priority):
+    if task_supervisor.acquire(t, priority):
+        t.start()
+        releaser = threading.Thread(target=_background_job_releaser, args=(t,))
+        releaser.setDaemon(True)
+        releaser.start()
 
 
 def _background_job_releaser(t):

@@ -1,7 +1,7 @@
 __author__ = "Altertech Group, http://www.altertech.com/"
 __copyright__ = "Copyright (C) 2018-2019 Altertech Group"
 __license__ = "Apache License 2.0"
-__version__ = "0.2.4"
+__version__ = "0.2.5"
 
 import threading
 import queue
@@ -16,6 +16,7 @@ from pyaltt import TASK_NORMAL
 from pyaltt import TASK_HIGH
 from pyaltt import TASK_CRITICAL
 
+logger = logging.getLogger('pyaltt::workers')
 
 class BackgroundWorker:
 
@@ -109,9 +110,9 @@ class BackgroundWorker:
                     return True
 
     def _start_worker(self, *args, **kwargs):
-        logging.debug(self.name + ' started')
+        logger.debug(self.name + ' started')
         self.loop(*args, **kwargs)
-        logging.debug(self.name + ' stopped')
+        logger.debug(self.name + ' stopped')
 
     def loop(self, *args, **kwargs):
         while self._active:
