@@ -2,7 +2,7 @@ import time
 import logging
 
 from pyaltt import background_worker
-from pyaltt import background_job
+from pyaltt import background_task
 from pyaltt import task_supervisor
 
 import pyaltt
@@ -51,7 +51,7 @@ Q.put('task3')
 Q.put('task4')
 print('ALL SET')
 time.sleep(0.1)
-background_job(test, name='ttt', wait_start=True)()
+background_task(test, name='ttt', wait_start=True)()
 print('job ttt started')
 time.sleep(5)
 myqueuedworker.stop()

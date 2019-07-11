@@ -27,7 +27,7 @@ class LocalProxy(threading.local):
         return delattr(self, attr) if hasattr(self, attr) else True
 
 
-def background_job(f, *args, **kwargs):
+def background_task(f, *args, **kwargs):
 
     @wraps(f)
     def start_thread(*args, **kw):
@@ -39,7 +39,7 @@ def background_job(f, *args, **kwargs):
             kwargs=kw)
         if kwargs.get('daemon'): t.setDaemon(True)
         starter = threading.Thread(
-            target=_background_job_starter,
+            target=_background_task_starter,
             args=(t, kwargs.get('priority', TASK_NORMAL)))
         starter.setDaemon(True)
         starter.start()
@@ -50,14 +50,14 @@ def background_job(f, *args, **kwargs):
     return start_thread
 
 
-def _background_job_starter(t, priority):
+def _background_task_starter(t, priority):
     if task_supervisor.acquire(t, priority):
         t.start()
-        releaser = threading.Thread(target=_background_job_releaser, args=(t,))
+        releaser = threading.Thread(target=_background_task_releaser, args=(t,))
         releaser.setDaemon(True)
         releaser.start()
 
 
-def _background_job_releaser(t):
+def _background_task_releaser(t):
     t.join()
     task_supervisor.release(t)

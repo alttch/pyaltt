@@ -20,7 +20,7 @@ from pyaltt.workers import BackgroundEventWorker
 from pyaltt.f import FunctionCollecton
 
 from pyaltt.threads import LocalProxy
-from pyaltt.threads import background_job
+from pyaltt.threads import background_task
 
 
 g = LocalProxy()
