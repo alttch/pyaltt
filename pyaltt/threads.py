@@ -1,7 +1,7 @@
 __author__ = "Altertech Group, http://www.altertech.com/"
 __copyright__ = "Copyright (C) 2018-2019 Altertech Group"
 __license__ = "Apache License 2.0"
-__version__ = "0.2.5"
+__version__ = "0.2.6"
 
 import threading
 
@@ -46,7 +46,7 @@ def background_job(f, *args, **kwargs):
             args=(t, kwargs.get('priority', TASK_LOW)))
         starter.setDaemon(True)
         starter.start()
-        if kwargs.get('wait'):
+        if kwargs.get('wait_start'):
             starter.join()
         return t
 
