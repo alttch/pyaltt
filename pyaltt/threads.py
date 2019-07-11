@@ -7,6 +7,13 @@ import threading
 
 from functools import wraps
 
+from pyaltt import task_supervisor
+
+from pyaltt import TASK_LOW
+from pyaltt import TASK_NORMAL
+from pyaltt import TASK_HIGH
+from pyaltt import TASK_CRITICAL
+
 
 class LocalProxy(threading.local):
 
@@ -34,7 +41,16 @@ def background_job(f, *args, **kwargs):
             args=args,
             kwargs=kw)
         if kwargs.get('daemon'): t.setDaemon(True)
-        t.start()
+        if task_supervisor.acquire(t, kwargs.get('priority', TASK_LOW)):
+            t.start()
+            releaser = threading.Thread(
+                target=_background_job_releaser, args=(t,))
+            releaser.start()
         return t
 
     return start_thread
+
+
+def _background_job_releaser(t):
+    t.join()
+    task_supervisor.release(t)

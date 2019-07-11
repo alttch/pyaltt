@@ -9,6 +9,13 @@ import logging
 import uuid
 import time
 
+from pyaltt import task_supervisor
+
+from pyaltt import TASK_LOW
+from pyaltt import TASK_NORMAL
+from pyaltt import TASK_HIGH
+from pyaltt import TASK_CRITICAL
+
 
 class BackgroundWorker:
 
@@ -16,10 +23,11 @@ class BackgroundWorker:
         self.__thread = None
         self._active = False
         self.daemon = kwargs.get('daemon', True)
+        self.priority = kwargs.get('priority', TASK_LOW)
         self.o = kwargs.get('o')
         self.on_error = kwargs.get('on_error')
         self.on_error_kwargs = kwargs.get('on_error_kwargs', {})
-        self.poll_delay = kwargs.get('poll_delay', 0.1)
+        self.poll_delay = kwargs.get('poll_delay', task_supervisor.poll_delay)
         self.delay_before = kwargs.get('delay_before')
         self.delay = kwargs.get('interval',
                                 kwargs.get('delay', kwargs.get('delay_after')))
@@ -36,23 +44,26 @@ class BackgroundWorker:
                                                uuid.uuid4())
 
     def start(self, *args, **kwargs):
-        self.delay_before = kwargs.get('_delay_before', self.delay_before)
-        self.delay = kwargs.get(
-            '_interval',
-            kwargs.get('_delay', kwargs.get('_delay_after', self.delay)))
-        if '_interval' in kwargs:
+        kw = kwargs.copy()
+        self.delay_before = kw.get('_delay_before', self.delay_before)
+        self.delay = kw.get(
+            '_interval', kw.get('_delay', kw.get('_delay_after', self.delay)))
+        if '_interval' in kw:
             self.keep_interval = True
-        if '_name' in kwargs:
-            self.set_name(kwargs['_name'])
-        self.realtime = kwargs.get('_realtime', self.realtime)
-        kwargs['_worker'] = self
+        if '_name' in kw:
+            self.set_name(kw['_name'])
+        if '_priority' in kw:
+            self.priority = kw['_priority']
+        self.realtime = kw.get('_realtime', self.realtime)
+        kw['_worker'] = self
+        if not 'worker_name' in kw:
+            kw['worker_name'] = self.name
+        if not 'o' in kw:
+            kw['o'] = self.o
         if not (self._active and self.__thread and self.__thread.isAlive()):
             self.__thread = threading.Thread(
-                target=self._start_worker,
-                name=self.name,
-                args=args,
-                kwargs=kwargs)
-            self.__thread.setDaemon(kwargs.get('_daemon', self.daemon))
+                target=self._start_worker, name=self.name, args=args, kwargs=kw)
+            self.__thread.setDaemon(kw.get('_daemon', self.daemon))
             self._active = True
             self.before_start()
             self.__thread.start()
@@ -103,20 +114,19 @@ class BackgroundWorker:
         logging.debug(self.name + ' stopped')
 
     def loop(self, *args, **kwargs):
-        kw = kwargs.copy()
-        if not 'worker_name' in kw:
-            kw['worker_name'] = self.name
-        if not 'o' in kw:
-            kw['o'] = self.o
         while self._active:
             try:
                 if self.keep_interval: tstart = time.time()
                 if self.delay_before:
                     if not self.sleep(self.delay_before): break
                 if not self._active: break
-                if self.run(*args, **kw) == False:
-                    self._active = False
-                    break
+                if task_supervisor.acquire(self, self.priority):
+                    try:
+                        if self.run(*args, **kwargs) == False:
+                            self._active = False
+                            break
+                    finally:
+                        task_supervisor.release(self)
                 if not self._active: break
                 if self.delay:
                     if self.keep_interval:
@@ -156,22 +166,20 @@ class BackgroundQueueWorker(BackgroundWorker):
         self._Q.put(task)
 
     def loop(self, *args, **kwargs):
-        kw = kwargs.copy()
-        if not 'worker_name' in kw:
-            kw['worker_name'] = self.name
-        if not 'o' in kw:
-            kw['o'] = self.o
         while self._active:
             try:
                 task = self._Q.get()
                 if not self._active: break
                 if task is not None:
-                    try:
-                        if self.run(task, *args, **kw) == False:
-                            self._active = False
-                            break
-                    except Exception as e:
-                        self.error(e)
+                    if task_supervisor.acquire(self, self.priority):
+                        try:
+                            if self.run(task, *args, **kwargs) == False:
+                                self._active = False
+                                break
+                        except Exception as e:
+                            self.error(e)
+                        finally:
+                            task_supervisor.release(self)
             except Exception as e:
                 self.error(e)
 
@@ -189,22 +197,20 @@ class BackgroundEventWorker(BackgroundWorker):
         self.event.set()
 
     def loop(self, *args, **kwargs):
-        kw = kwargs.copy()
-        if not 'worker_name' in kw:
-            kw['worker_name'] = self.name
-        if not 'o' in kw:
-            kw['o'] = self.o
         while self._active:
             try:
                 self.event.wait()
                 self.event.clear()
                 if not self._active: break
-                try:
-                    if self.run(*args, **kw) == False:
-                        self._active = False
-                        break
-                except Exception as e:
-                    self.error(e)
+                if task_supervisor.acquire(self, self.priority):
+                    try:
+                        if self.run(*args, **kwargs) == False:
+                            self._active = False
+                            break
+                    except Exception as e:
+                        self.error(e)
+                    finally:
+                        task_supervisor.release(self)
             except Exception as e:
                 self.error(e)
 
