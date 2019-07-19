@@ -1,6 +1,7 @@
 # pyaltt
 **this library is deprecated and no longer supported**
-**Use (atasker)[https://pypi.org/project/atasker/] library instead**
+
+**Use [atasker](https://pypi.org/project/atasker/) library instead**
 
 Various tools for functions, looped and queued workers etc.
 
